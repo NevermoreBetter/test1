@@ -1,0 +1,23 @@
+import { db } from "@/lib/prisma";
+import { NextResponse } from "next/server";
+
+export async function POST(req: Request) {
+ try {
+  const { name, email, dob, title } = await req.json();
+  const eve = await db.event.findFirst({ where: { title: title } });
+  const createResume = await db.user.create({
+   data: {
+    name,
+    email,
+    dob,
+    eventId: eve?.id,
+   },
+  });
+  return NextResponse.json(createResume, { status: 201 });
+ } catch (error) {
+  return NextResponse.json(
+   { message: "Something went wrong in api" + error },
+   { status: 500 }
+  );
+ }
+}
