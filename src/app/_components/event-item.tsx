@@ -12,7 +12,6 @@ interface IEvent {
 }
 
 const EventItem = ({ event }: IEvent) => {
- console.log(event.time);
  return (
   <div className="flex flex-col justify-between  gap-7 p-4 border h-[250px] w-[500px]">
    <div className="flex flex-col gap-4">

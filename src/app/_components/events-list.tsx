@@ -8,69 +8,50 @@ import { db } from "@/lib/prisma";
 import axios from "axios";
 
 interface IEvent {
- id: string;
- title: string;
- description: string;
- time: Date;
- organizer: string;
+ events: {
+  id: string;
+  title: string;
+  description: string;
+  time: Date;
+  organizer: string;
+ }[];
 }
 
-const EventsList = () => {
+const EventsList = ({ events }: IEvent) => {
+ const [event, setEvent] = useState();
+ const [itemOffset, setItemOffset] = useState(0);
  const [sortOption, setSortOption] = useState<"title" | "time" | "organizer">(
   "title"
  );
  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
- const [offset, setOffset] = useState(9);
- const [data, setData] = useState<IEvent[]>([]);
- const [loading, setLoading] = useState(false);
 
- const sortedEvents = [...data].sort((a, b) => {
+ let endOffset, currentItems, pageCount;
+ const eventsPerPage = 6;
+
+ const sortedEvents = [...events].sort((a, b) => {
   let result;
   if (sortOption === "title") {
    result = a.title.localeCompare(b.title);
   } else if (sortOption === "time") {
-   result = new Date(a.time).getTime() - new Date(b.time).getTime();
+   result = a.time.getTime() - b.time.getTime();
   } else {
    result = a.organizer.localeCompare(b.organizer);
   }
   return sortOrder === "asc" ? result : -result;
  });
 
- useEffect(() => {
-  const fetchEvents = async () => {
-   const response = await fetch(`/api/events?offset=${offset}`);
-   const data = await response.json();
-   setData(data);
-   setLoading(false);
-  };
-  fetchEvents();
- }, [offset]);
+ if (sortedEvents) {
+  endOffset = itemOffset + eventsPerPage;
+  currentItems = sortedEvents.slice(itemOffset, endOffset);
+  pageCount = Math.ceil(sortedEvents.length / eventsPerPage);
+ }
+ console.log(event);
 
- let prevScrollPos = window.scrollY;
- let scrollingDown = true;
+ const handlePageClick = (event: { selected: number }) => {
+  const newOffset = (event.selected * eventsPerPage) % sortedEvents.length;
 
- const handleScroll = () => {
-  const currentScrollPos = window.scrollY;
-
-  scrollingDown = currentScrollPos > prevScrollPos;
-
-  if (
-   window.innerHeight + currentScrollPos + 1 >=
-    document.documentElement.scrollHeight &&
-   scrollingDown
-  ) {
-   setLoading(true);
-   setOffset((prev) => prev + 1);
-  }
-
-  prevScrollPos = currentScrollPos;
+  setItemOffset(newOffset);
  };
-
- useEffect(() => {
-  window.addEventListener("scroll", handleScroll);
-  return () => window.removeEventListener("scroll", handleScroll);
- }, []);
-
  return (
   <div className="flex  flex-col  gap-4">
    <div className="flex gap-4">
@@ -103,14 +84,26 @@ const EventsList = () => {
      {sortOption === "organizer" && sortOrder === "asc" ? "▲" : "▼"}
     </Button>
    </div>
-   <div className="flex flex-wrap justify-center gap-5">
-    {sortedEvents!.map((event) => (
+   <div className="flex flex-wrap gap-5">
+    {currentItems!.map((event) => (
      <div key={event.id}>
       <EventItem event={event} />
      </div>
     ))}
    </div>
-   {loading ? <>Loading...</> : <></>}
+   <ReactPaginate
+    breakLabel="..."
+    nextLabel=">"
+    onPageChange={handlePageClick}
+    pageRangeDisplayed={5}
+    pageCount={pageCount!}
+    previousLabel="<"
+    className="flex text-gray-400 gap-4 justify-center items-center"
+    nextClassName="text-white"
+    previousClassName="text-white"
+    activeClassName="text-white text-lg font-bold"
+    renderOnZeroPageCount={null}
+   />
   </div>
  );
 };
