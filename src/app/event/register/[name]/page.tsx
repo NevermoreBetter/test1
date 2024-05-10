@@ -2,7 +2,7 @@ import { EventForm } from "./_components/event-form";
 
 const NewPage = () => {
  return (
-  <div>
+  <div className="w-1/4 m-[0_auto]">
    <EventForm />
   </div>
  );

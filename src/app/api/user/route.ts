@@ -3,13 +3,14 @@ import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
  try {
-  const { name, email, dob, title } = await req.json();
+  const { name, email, dob, type, title } = await req.json();
   const eve = await db.event.findFirst({ where: { title: title } });
   const createResume = await db.user.create({
    data: {
     name,
     email,
     dob,
+    type,
     eventId: eve?.id,
    },
   });

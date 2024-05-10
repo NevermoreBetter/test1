@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 interface IEvent {
@@ -12,17 +13,27 @@ interface IEvent {
 
 const EventItem = ({ event }: IEvent) => {
  return (
-  <div className="flex flex-col  gap-7 p-4 border w-[300px]">
+  <div className="flex flex-col justify-between  gap-7 p-4 border h-[250px] w-[500px]">
    <div className="flex flex-col gap-4">
     <div className="flex justify-between">
      <h2 className="font-bold textxl">{event.title}</h2>
-     <p className="text-gray-600">{event.time.toLocaleString()}</p>
+     <p className="text-gray-600">
+      {event.time.toLocaleString("en-US", {
+       year: "numeric",
+       month: "long",
+       day: "numeric",
+      })}
+     </p>
     </div>
-    <p>{event.description}</p>
+    <p className="line-clamp-4">{event.description}</p>
    </div>
    <div className="flex justify-between">
-    <Link href={`/event/register/${event.title}`}>Register</Link>
-    <Link href={`/event/${event.id}`}>View</Link>
+    <Link href={`/event/register/${event.title}`}>
+     <Button>Register</Button>
+    </Link>
+    <Link href={`/event/${event.id}`}>
+     <Button variant={"ghost"}>View</Button>
+    </Link>
    </div>
   </div>
  );

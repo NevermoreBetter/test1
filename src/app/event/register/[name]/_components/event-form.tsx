@@ -7,6 +7,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
 import { format } from "date-fns";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
  Form,
  FormControl,
@@ -35,6 +36,9 @@ const FormSchema = z.object({
  email: z.string().email(),
  dob: z.date({
   required_error: "A date of birth is required.",
+ }),
+ type: z.enum(["Social media", "Friends", "Found myself"], {
+  required_error: "Select a notification type.",
  }),
 });
 
@@ -68,7 +72,7 @@ export function EventForm() {
 
  return (
   <Form {...form}>
-   <form onSubmit={form.handleSubmit(onSubmit)} className="w-2/3 space-y-6">
+   <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-6">
     <FormField
      control={form.control}
      name="name"
@@ -125,13 +129,45 @@ export function EventForm() {
           disabled={(date) =>
            date > new Date() || date < new Date("1900-01-01")
           }
-          initialFocus
          />
         </PopoverContent>
        </Popover>
-       <FormDescription>
-        Your date of birth is used to calculate your age.
-       </FormDescription>
+       <FormMessage />
+      </FormItem>
+     )}
+    />
+    <FormField
+     control={form.control}
+     name="type"
+     render={({ field }) => (
+      <FormItem className="space-y-3">
+       <FormLabel>Where did you hear about this event?</FormLabel>
+       <FormControl>
+        <RadioGroup
+         onValueChange={field.onChange}
+         defaultValue={field.value}
+         className="flex space-y-1"
+        >
+         <FormItem className="flex items-center space-x-3 space-y-0">
+          <FormControl>
+           <RadioGroupItem value="Social media" />
+          </FormControl>
+          <FormLabel className="font-normal">Social media</FormLabel>
+         </FormItem>
+         <FormItem className="flex items-center space-x-3 space-y-0">
+          <FormControl>
+           <RadioGroupItem value="Friends" />
+          </FormControl>
+          <FormLabel className="font-normal">Friends</FormLabel>
+         </FormItem>
+         <FormItem className="flex items-center space-x-3 space-y-0">
+          <FormControl>
+           <RadioGroupItem value="Found myself" />
+          </FormControl>
+          <FormLabel className="font-normal">Found myself</FormLabel>
+         </FormItem>
+        </RadioGroup>
+       </FormControl>
        <FormMessage />
       </FormItem>
      )}

@@ -9,20 +9,21 @@ datasource db {
 }
 
 model User {
-  id        String      @id @default(cuid())
+  id        String   @id @default(cuid())
   name      String
   email     String   @unique
   dob       String
+  type      String
   createdAt DateTime @default(now())
   event     Event?   @relation(fields: [eventId], references: [id])
   eventId   String?
 }
 
 model Event {
-  id           String      @id @default(cuid())
+  id           String   @id @default(cuid())
   title        String
   description  String
-  time         DateTime
+  time         DateTime @default(now())
   organizer    String
   participants User[]
 }
