@@ -12,18 +12,13 @@ interface IEvent {
 }
 
 const EventItem = ({ event }: IEvent) => {
+ console.log(event.time);
  return (
   <div className="flex flex-col justify-between  gap-7 p-4 border h-[250px] w-[500px]">
    <div className="flex flex-col gap-4">
     <div className="flex justify-between">
      <h2 className="font-bold textxl">{event.title}</h2>
-     <p className="text-gray-600">
-      {event.time.toLocaleString("en-US", {
-       year: "numeric",
-       month: "long",
-       day: "numeric",
-      })}
-     </p>
+     <p className="text-gray-600">{event.time.toLocaleString("en-US")}</p>
     </div>
     <p className="line-clamp-4">{event.description}</p>
    </div>

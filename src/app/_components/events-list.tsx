@@ -2,52 +2,75 @@
 
 import EventItem from "./event-item";
 import ReactPaginate from "react-paginate";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { db } from "@/lib/prisma";
+import axios from "axios";
 
 interface IEvent {
- events: {
-  id: string;
-  title: string;
-  description: string;
-  time: Date;
-  organizer: string;
- }[];
+ id: string;
+ title: string;
+ description: string;
+ time: Date;
+ organizer: string;
 }
 
-const EventsList = ({ events }: IEvent) => {
- const [itemOffset, setItemOffset] = useState(0);
+const EventsList = () => {
  const [sortOption, setSortOption] = useState<"title" | "time" | "organizer">(
   "title"
  );
  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+ const [offset, setOffset] = useState(9);
+ const [data, setData] = useState<IEvent[]>([]);
+ const [loading, setLoading] = useState(false);
 
- let endOffset, currentItems, pageCount;
- const eventsPerPage = 5;
-
- const sortedEvents = [...events].sort((a, b) => {
+ const sortedEvents = [...data].sort((a, b) => {
   let result;
   if (sortOption === "title") {
    result = a.title.localeCompare(b.title);
   } else if (sortOption === "time") {
-   result = a.time.getTime() - b.time.getTime();
+   result = new Date(a.time).getTime() - new Date(b.time).getTime();
   } else {
    result = a.organizer.localeCompare(b.organizer);
   }
   return sortOrder === "asc" ? result : -result;
  });
 
- if (sortedEvents) {
-  endOffset = itemOffset + eventsPerPage;
-  currentItems = sortedEvents.slice(itemOffset, endOffset);
-  pageCount = Math.ceil(sortedEvents.length / eventsPerPage);
- }
+ useEffect(() => {
+  const fetchEvents = async () => {
+   const response = await fetch(`/api/events?offset=${offset}`);
+   const data = await response.json();
+   setData(data);
+   setLoading(false);
+  };
+  fetchEvents();
+ }, [offset]);
 
- const handlePageClick = (event: { selected: number }) => {
-  const newOffset = (event.selected * eventsPerPage) % sortedEvents.length;
+ let prevScrollPos = window.scrollY;
+ let scrollingDown = true;
 
-  setItemOffset(newOffset);
+ const handleScroll = () => {
+  const currentScrollPos = window.scrollY;
+
+  scrollingDown = currentScrollPos > prevScrollPos;
+
+  if (
+   window.innerHeight + currentScrollPos + 1 >=
+    document.documentElement.scrollHeight &&
+   scrollingDown
+  ) {
+   setLoading(true);
+   setOffset((prev) => prev + 1);
+  }
+
+  prevScrollPos = currentScrollPos;
  };
+
+ useEffect(() => {
+  window.addEventListener("scroll", handleScroll);
+  return () => window.removeEventListener("scroll", handleScroll);
+ }, []);
+
  return (
   <div className="flex  flex-col  gap-4">
    <div className="flex gap-4">
@@ -80,26 +103,14 @@ const EventsList = ({ events }: IEvent) => {
      {sortOption === "organizer" && sortOrder === "asc" ? "▲" : "▼"}
     </Button>
    </div>
-   <div className="flex flex-wrap gap-5">
-    {currentItems!.map((event) => (
+   <div className="flex flex-wrap justify-center gap-5">
+    {sortedEvents!.map((event) => (
      <div key={event.id}>
       <EventItem event={event} />
      </div>
     ))}
    </div>
-   <ReactPaginate
-    breakLabel="..."
-    nextLabel=">"
-    onPageChange={handlePageClick}
-    pageRangeDisplayed={5}
-    pageCount={pageCount!}
-    previousLabel="<"
-    className="flex text-gray-400 gap-4 justify-center items-center"
-    nextClassName="text-white"
-    previousClassName="text-white"
-    activeClassName="text-white text-lg font-bold"
-    renderOnZeroPageCount={null}
-   />
+   {loading ? <>Loading...</> : <></>}
   </div>
  );
 };
