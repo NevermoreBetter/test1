@@ -77,6 +77,7 @@ const EventCard = ({ data, event }: IProps) => {
  };
 
  const options = {
+  type: "linear",
   scales: {
    y: {
     ticks: {

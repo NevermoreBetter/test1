@@ -2,13 +2,14 @@
 
 import EventItem from "./event-item";
 import ReactPaginate from "react-paginate";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { db } from "@/lib/prisma";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInView } from "react-intersection-observer";
 import axios from "axios";
 
 interface IEvent {
- events: {
+ data: {
   id: string;
   title: string;
   description: string;
@@ -17,41 +18,73 @@ interface IEvent {
  }[];
 }
 
-const EventsList = ({ events }: IEvent) => {
- const [eve, setEve] = useState();
- const listInnerRef = useRef();
- const [itemOffset, setItemOffset] = useState(0);
+type UserQueryParams = {
+ take?: number;
+ lastCursor?: string;
+};
+
+const allEvents = async ({ take, lastCursor }: UserQueryParams) => {
+ const response = await axios.get("/api/events", {
+  params: { take, lastCursor },
+ });
+ return response?.data;
+};
+
+const EventsList = () => {
  const [sortOption, setSortOption] = useState<"title" | "time" | "organizer">(
-  "title"
+  "time"
  );
  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+ const { ref, inView } = useInView();
 
- let endOffset, currentItems, pageCount;
- const eventsPerPage = 6;
-
- const sortedEvents = [...events].sort((a, b) => {
-  let result;
-  if (sortOption === "title") {
-   result = a.title.localeCompare(b.title);
-  } else if (sortOption === "time") {
-   result = a.time.getTime() - b.time.getTime();
-  } else {
-   result = a.organizer.localeCompare(b.organizer);
-  }
-  return sortOrder === "asc" ? result : -result;
+ const {
+  data,
+  error,
+  isLoading,
+  hasNextPage,
+  fetchNextPage,
+  isSuccess,
+  isFetchingNextPage,
+ } = useInfiniteQuery({
+  queryFn: ({ pageParam = "" }) =>
+   allEvents({ take: 10, lastCursor: pageParam }),
+  queryKey: ["events"],
+  getNextPageParam: (lastPage) => {
+   return lastPage?.metaData.lastCursor;
+  },
  });
 
- if (sortedEvents) {
-  endOffset = itemOffset + eventsPerPage;
-  currentItems = sortedEvents.slice(itemOffset, endOffset);
-  pageCount = Math.ceil(sortedEvents.length / eventsPerPage);
- }
+ useEffect(() => {
+  if (inView && hasNextPage) {
+   fetchNextPage();
+  }
+ }, [hasNextPage, inView, fetchNextPage]);
 
- const handlePageClick = (event: { selected: number }) => {
-  const newOffset = (event.selected * eventsPerPage) % sortedEvents.length;
+ if (error as any)
+  return (
+   <div className="mt-10">
+    {"An error has occurred: " + (error as any).message}
+   </div>
+  );
 
-  setItemOffset(newOffset);
- };
+ console.log("data:", data);
+
+ const sortedEvents = []
+  .concat(...(data?.pages || []).map((page) => page.data))
+  .sort((a, b) => {
+   let result;
+   if (sortOption === "title") {
+    result = a.title.localeCompare(b.title);
+   }
+   //    else if (sortOption === "time") {
+   //     result = a.time.getTime() - b.time.getTime();
+   //    }
+   else {
+    result = a.organizer.localeCompare(b.organizer);
+   }
+   return sortOrder === "asc" ? result : -result;
+  });
+
  return (
   <div className="flex  flex-col  gap-4">
    <div className="flex gap-4">
@@ -84,26 +117,25 @@ const EventsList = ({ events }: IEvent) => {
      {sortOption === "organizer" && sortOrder === "asc" ? "▲" : "▼"}
     </Button>
    </div>
-   <div className="flex flex-wrap gap-5">
-    {currentItems!.map((event) => (
-     <div key={event.id}>
-      <EventItem event={event} />
-     </div>
-    ))}
+   <div className="mt-10 flex flex-wrap gap-10 w-full justify-center">
+    {isSuccess &&
+     sortedEvents.map((event, index) => {
+      if (sortedEvents.length === index + 1) {
+       return (
+        <div className="h-[250px] w-[30%]" ref={ref} key={index}>
+         <EventItem event={event} />
+        </div>
+       );
+      } else {
+       return (
+        <div className="h-[250px] w-[30%]" key={index}>
+         <EventItem event={event} />
+        </div>
+       );
+      }
+     })}
+    {(isLoading || isFetchingNextPage) && <p className="mb-4">Loading...</p>}
    </div>
-   <ReactPaginate
-    breakLabel="..."
-    nextLabel=">"
-    onPageChange={handlePageClick}
-    pageRangeDisplayed={5}
-    pageCount={pageCount!}
-    previousLabel="<"
-    className="flex text-gray-400 gap-4 justify-center items-center"
-    nextClassName="text-white"
-    previousClassName="text-white"
-    activeClassName="text-white text-lg font-bold"
-    renderOnZeroPageCount={null}
-   />
   </div>
  );
 };
