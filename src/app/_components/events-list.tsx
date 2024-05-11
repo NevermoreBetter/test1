@@ -9,13 +9,11 @@ import { useInView } from "react-intersection-observer";
 import axios from "axios";
 
 interface IEvent {
- data: {
-  id: string;
-  title: string;
-  description: string;
-  time: Date;
-  organizer: string;
- }[];
+ id: string;
+ title: string;
+ description: string;
+ time: Date;
+ organizer: string;
 }
 
 type UserQueryParams = {
@@ -52,6 +50,7 @@ const EventsList = () => {
   getNextPageParam: (lastPage) => {
    return lastPage?.metaData.lastCursor;
   },
+  initialPageParam: "",
  });
 
  useEffect(() => {
@@ -67,19 +66,17 @@ const EventsList = () => {
    </div>
   );
 
- console.log("data:", data);
-
  const sortedEvents = []
   .concat(...(data?.pages || []).map((page) => page.data))
-  .sort((a, b) => {
+  .sort((a: IEvent, b: IEvent) => {
    let result;
    if (sortOption === "title") {
     result = a.title.localeCompare(b.title);
-   }
-   //    else if (sortOption === "time") {
-   //     result = a.time.getTime() - b.time.getTime();
-   //    }
-   else {
+   } else if (sortOption === "time") {
+    let aTime = new Date(a.time);
+    let bTime = new Date(b.time);
+    result = aTime.getTime() - bTime.getTime();
+   } else {
     result = a.organizer.localeCompare(b.organizer);
    }
    return sortOrder === "asc" ? result : -result;
