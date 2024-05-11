@@ -1,12 +1,12 @@
 "use client";
 
 import EventItem from "./event-item";
-import ReactPaginate from "react-paginate";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useInView } from "react-intersection-observer";
 import axios from "axios";
+import Spinner from "@/components/spinner";
 
 interface IEvent {
  id: string;
@@ -131,7 +131,7 @@ const EventsList = () => {
        );
       }
      })}
-    {(isLoading || isFetchingNextPage) && <p className="mb-4">Loading...</p>}
+    {(isLoading || isFetchingNextPage) && <Spinner />}
    </div>
   </div>
  );

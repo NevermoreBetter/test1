@@ -34,7 +34,7 @@ const EventItem = ({ event }: IEvent) => {
     <p className="line-clamp-4">{event.description}</p>
    </div>
    <div className="flex justify-between">
-    <Link href={`/event/register/${event.title}`}>
+    <Link href={`/event/register/${event.id}`}>
      <Button>Register</Button>
     </Link>
     <Link href={`/event/${event.id}`}>

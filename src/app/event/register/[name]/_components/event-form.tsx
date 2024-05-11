@@ -5,6 +5,8 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
+import "react-datepicker/dist/react-datepicker.css";
+
 import axios from "axios";
 import { format } from "date-fns";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -26,7 +28,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 
 const FormSchema = z.object({
@@ -48,7 +50,9 @@ const FormSchema = z.object({
 });
 
 export function EventForm() {
+ const [isCalendarOpen, setIsCalendarOpen] = useState(false);
  const [isSubmitting, setIsSubmitting] = useState(false);
+ const route = useRouter();
  const path = usePathname();
  const title = path.split("/")[3];
  const form = useForm<z.infer<typeof FormSchema>>({
@@ -68,6 +72,8 @@ export function EventForm() {
     description: "Your form has been submitted.",
     duration: 3000,
    });
+   route.push(`/event/${title}`);
+   route.refresh();
   } catch (error) {
    toast({
     title: "Not submitted",
@@ -116,7 +122,7 @@ export function EventForm() {
      render={({ field }) => (
       <FormItem className="flex flex-col">
        <FormLabel>Date of birth</FormLabel>
-       <Popover>
+       <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
         <PopoverTrigger asChild>
          <FormControl>
           <Button
@@ -133,9 +139,15 @@ export function EventForm() {
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
          <Calendar
+          captionLayout="dropdown-buttons"
+          fromYear={1920}
+          toYear={2024}
           mode="single"
           selected={field.value}
-          onSelect={field.onChange}
+          onSelect={(date) => {
+           field.onChange(date);
+           setIsCalendarOpen(false);
+          }}
           disabled={(date) =>
            date > new Date() || date < new Date("1900-01-01")
           }

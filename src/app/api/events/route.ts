@@ -1,14 +1,21 @@
 import { db } from "@/lib/prisma";
 
+enum HTTPStatusCode {
+ OK = 200,
+ FORBIDDEN = 403,
+}
+
 export async function GET(req: Request) {
  try {
   const url = new URL(req.url);
 
   const take = url.searchParams.get("take");
   const lastCursor = url.searchParams.get("lastCursor");
+  const FIRST_FETCH_TAKE = 10;
+  const NEXT_FETCH_TAKE = 7;
 
   let result = await db.event.findMany({
-   take: take ? parseInt(take as string) : 10,
+   take: take ? parseInt(take as string) : FIRST_FETCH_TAKE,
    ...(lastCursor && {
     skip: 1,
     cursor: {
@@ -17,7 +24,7 @@ export async function GET(req: Request) {
    }),
   });
 
-  if (result.length == 0) {
+  if (!result.length) {
    return new Response(
     JSON.stringify({
      data: [],
@@ -26,7 +33,7 @@ export async function GET(req: Request) {
       hasNextPage: false,
      },
     }),
-    { status: 200 }
+    { status: HTTPStatusCode.OK }
    );
   }
 
@@ -34,7 +41,7 @@ export async function GET(req: Request) {
   const cursor: any = lastPostInResults.id;
 
   const nextPage = await db.event.findMany({
-   take: take ? parseInt(take as string) : 7,
+   take: take ? parseInt(take as string) : NEXT_FETCH_TAKE,
    skip: 1,
    cursor: {
     id: cursor,
@@ -49,11 +56,11 @@ export async function GET(req: Request) {
    },
   };
 
-  return new Response(JSON.stringify(data), { status: 200 });
+  return new Response(JSON.stringify(data), { status: HTTPStatusCode.OK });
  } catch (error: any) {
   return new Response(
    JSON.stringify(JSON.stringify({ error: error.message })),
-   { status: 403 }
+   { status: HTTPStatusCode.FORBIDDEN }
   );
  }
 }

@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 export async function POST(req: Request) {
  try {
   const { name, email, dob, type, title } = await req.json();
-  const eve = await db.event.findFirst({ where: { title: title } });
+  const eve = await db.event.findFirst({ where: { id: title } });
   const createResume = await db.user.create({
    data: {
     name,
