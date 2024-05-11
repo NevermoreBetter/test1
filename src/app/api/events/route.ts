@@ -1,9 +1,7 @@
 import { db } from "@/lib/prisma";
-import { NextResponse } from "next/server";
 
 export async function GET(req: Request) {
  try {
-  // get page and lastCursor from query
   const url = new URL(req.url);
 
   const take = url.searchParams.get("take");
@@ -12,7 +10,7 @@ export async function GET(req: Request) {
   let result = await db.event.findMany({
    take: take ? parseInt(take as string) : 10,
    ...(lastCursor && {
-    skip: 1, // Do not include the cursor itself in the query result.
+    skip: 1,
     cursor: {
      id: lastCursor as string,
     },
@@ -36,9 +34,8 @@ export async function GET(req: Request) {
   const cursor: any = lastPostInResults.id;
 
   const nextPage = await db.event.findMany({
-   // Same as before, limit the number of events returned by this query.
    take: take ? parseInt(take as string) : 7,
-   skip: 1, // Do not include the cursor itself in the query result.
+   skip: 1,
    cursor: {
     id: cursor,
    },
