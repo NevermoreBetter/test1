@@ -84,7 +84,7 @@ const EventsList = () => {
 
  return (
   <div className="flex  flex-col  gap-4">
-   <div className="flex gap-4">
+   <div className="flex gap-4 lg:flex-row flex-col">
     <Button
      onClick={() => {
       setSortOption("title");
@@ -114,18 +114,18 @@ const EventsList = () => {
      {sortOption === "organizer" && sortOrder === "asc" ? "▲" : "▼"}
     </Button>
    </div>
-   <div className="mt-10 flex flex-wrap gap-10 w-full justify-center">
+   <div className="mt-10 flex lg:flex-row flex-col flex-wrap gap-10 w-full justify-center">
     {isSuccess &&
      sortedEvents.map((event, index) => {
       if (sortedEvents.length === index + 1) {
        return (
-        <div className="h-[250px] w-[30%]" ref={ref} key={index}>
+        <div ref={ref} key={index}>
          <EventItem event={event} />
         </div>
        );
       } else {
        return (
-        <div className="h-[250px] w-[30%]" key={index}>
+        <div key={index}>
          <EventItem event={event} />
         </div>
        );

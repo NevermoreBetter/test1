@@ -14,7 +14,7 @@ interface IEvent {
 const EventItem = ({ event }: IEvent) => {
  const date = new Date(event.time);
  return (
-  <div className="flex flex-col justify-between  gap-7 p-4 border h-[250px] w-[500px]">
+  <div className="flex flex-col justify-between  gap-7 p-4 border h-[250px] lg:w-[500px] w-full">
    <div className="flex flex-col gap-4">
     <div className="flex justify-between">
      <h2 className="font-bold textxl">{event.title}</h2>

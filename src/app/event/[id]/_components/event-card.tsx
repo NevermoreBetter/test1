@@ -96,7 +96,7 @@ const EventCard = ({ data, event }: IProps) => {
      placeholder="Search by name or email"
      value={searchTerm}
      onChange={handleSearch}
-     className="border border-gray-300 rounded-md py-2 px-4 mb-5 w-1/4"
+     className="border border-gray-300 rounded-md py-2 px-4 mb-5 lg:w-1/4 w-full"
     />
    </div>
    <div className="flex gap-4 flex-wrap">
@@ -107,7 +107,7 @@ const EventCard = ({ data, event }: IProps) => {
      </div>
     ))}
    </div>
-   <div className="mt-8 w-1/2 m-[0_auto]">
+   <div className="mt-8 lg:w-1/2 w-full m-[0_auto]">
     {!!data.length ? (
      <div>
       <h3 className="text-2xl font-bold mb-4">Registrations per Day</h3>
