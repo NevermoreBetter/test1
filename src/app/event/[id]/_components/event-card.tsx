@@ -12,6 +12,7 @@ import {
  Title,
  Tooltip,
  Legend,
+ scales,
 } from "chart.js";
 
 ChartJS.register(
@@ -73,12 +74,13 @@ const EventCard = ({ data, event }: IProps) => {
     tension: 1,
    },
   ],
-  options: {
-   scales: {
-    y: {
-     ticks: {
-      stepSize: 1,
-     },
+ };
+
+ const options = {
+  scales: {
+   y: {
+    ticks: {
+     stepSize: 1,
     },
    },
   },
@@ -104,9 +106,15 @@ const EventCard = ({ data, event }: IProps) => {
      </div>
     ))}
    </div>
-   <div className="mt-8">
-    <h3 className="text-2xl font-bold mb-4">Registrations per Day</h3>
-    <Line data={chartData} />
+   <div className="mt-8 w-1/2 m-[0_auto]">
+    {!!data.length ? (
+     <div>
+      <h3 className="text-2xl font-bold mb-4">Registrations per Day</h3>
+      <Line data={chartData} options={options} />
+     </div>
+    ) : (
+     <div className="text-center text-gray-400">No registered users</div>
+    )}
    </div>
   </div>
  );

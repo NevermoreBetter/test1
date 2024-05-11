@@ -17,7 +17,10 @@ const EventItem = ({ event }: IEvent) => {
    <div className="flex flex-col gap-4">
     <div className="flex justify-between">
      <h2 className="font-bold textxl">{event.title}</h2>
-     <p className="text-gray-600">{event.time.toLocaleString("en-US")}</p>
+     <div className="flex flex-col justify-end items-end">
+      <p className="text-gray-600">{event.time.toLocaleString("en-US")}</p>
+      <p className="text-gray-600">by {event.organizer}</p>
+     </div>
     </div>
     <p className="line-clamp-4">{event.description}</p>
    </div>

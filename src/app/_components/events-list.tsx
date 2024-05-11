@@ -2,7 +2,7 @@
 
 import EventItem from "./event-item";
 import ReactPaginate from "react-paginate";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { db } from "@/lib/prisma";
 import axios from "axios";
@@ -18,7 +18,8 @@ interface IEvent {
 }
 
 const EventsList = ({ events }: IEvent) => {
- const [event, setEvent] = useState();
+ const [eve, setEve] = useState();
+ const listInnerRef = useRef();
  const [itemOffset, setItemOffset] = useState(0);
  const [sortOption, setSortOption] = useState<"title" | "time" | "organizer">(
   "title"
@@ -45,7 +46,6 @@ const EventsList = ({ events }: IEvent) => {
   currentItems = sortedEvents.slice(itemOffset, endOffset);
   pageCount = Math.ceil(sortedEvents.length / eventsPerPage);
  }
- console.log(event);
 
  const handlePageClick = (event: { selected: number }) => {
   const newOffset = (event.selected * eventsPerPage) % sortedEvents.length;

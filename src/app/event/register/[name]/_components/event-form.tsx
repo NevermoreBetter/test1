@@ -30,9 +30,14 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 const FormSchema = z.object({
- name: z.string().min(2, {
-  message: "Must be at least 4 characters.",
- }),
+ name: z
+  .string()
+  .min(2, {
+   message: "Must be at least 4 characters.",
+  })
+  .regex(/^[a-zA-Z\s]+$/, {
+   message: "Name should only contain letters and spaces.",
+  }),
  email: z.string().email(),
  dob: z.date({
   required_error: "A date of birth is required.",
@@ -64,6 +69,11 @@ export function EventForm() {
     duration: 3000,
    });
   } catch (error) {
+   toast({
+    title: "Not submitted",
+    description: "Something went wrong.",
+    duration: 3000,
+   });
    console.log(error);
   } finally {
    setIsSubmitting(false);
