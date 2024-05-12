@@ -34,7 +34,6 @@ const EventsList = () => {
  );
  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
  const { ref, inView } = useInView();
-
  const {
   data,
   error,

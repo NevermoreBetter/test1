@@ -48,3 +48,10 @@
   --ring: 221 42% 57%;
  }
 }
+
+body[data-scroll-locked] {
+ padding-top: 1.25rem !important;
+ padding-bottom: 1.25rem !important;
+ padding-left: 2.5rem !important;
+ padding-right: 2.5rem !important;
+}
